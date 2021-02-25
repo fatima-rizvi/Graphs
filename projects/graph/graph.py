@@ -38,7 +38,7 @@ class Graph:
     #         self.vertices[v1]
 
     # Doc's code
-    def add_edge(self, v1, v2):
+    def add_edge(self, v1, v2):/
         """
         Add a directed edge to the graph.
         """
@@ -178,9 +178,26 @@ class Graph:
         starting_vertex to destination_vertex in
         depth-first order.
         """
-        pass  # TODO
+        stack = Stack()
+        stack.push([starting_vertex])  # stack will contain list of paths
+        visited = set()
+        while stack.size() > 0:
+            path = stack.pop()
+            vert = path[-1]
+            if vert not in visited:
+                if vert == destination_vertex:
+                    return path
 
-    def dfs_recursive(self, starting_vertex, destination_vertex):
+                visited.add(vert)
+                for next_vert in self.get_neighbors(vert):
+                    new_path = list(path)
+                    new_path.append(next_vert)
+                    stack.push(new_path)
+
+        return None
+
+
+    def dfs_recursive(self, starting_vertex, destination_vertex, visited = None, path = None):
         """
         Return a list containing a path from
         starting_vertex to destination_vertex in
@@ -188,7 +205,28 @@ class Graph:
 
         This should be done using recursion.
         """
-        pass  # TODO
+
+        if not visited:
+            visited = set()
+
+        if not path:
+            path = []
+
+        visited.add(starting_vertex)
+        path = path + [starting_vertex]
+
+        if starting_vertex == destination_vertex:
+            return path
+
+        for child_vert in self.get_neighbors(starting_vertex):
+            if child_vert not in visited:
+                new_path = self.dfs_recursive(child_vert, destination_vertex, visited, path)
+
+                if new_path:
+                    return new_path
+
+        return None
+
 
 if __name__ == '__main__':
     graph = Graph()  # Instantiate your graph
