@@ -1,3 +1,7 @@
+import random
+from util import Stack
+
+
 class User:
     def __init__(self, name):
         self.name = name
@@ -17,7 +21,7 @@ class SocialGraph:
         elif friend_id in self.friendships[user_id] or user_id in self.friendships[friend_id]:
             print("WARNING: Friendship already exists")
         else:
-            self.friendships[user_id].add(friend_id)
+            self.friendships[user_id].add(friend_id)    #add edges between friends
             self.friendships[friend_id].add(user_id)
 
     def add_user(self, name):
@@ -45,8 +49,22 @@ class SocialGraph:
         # !!!! IMPLEMENT ME
 
         # Add users
+        for i in range(num_users):      # gotta get the number being their given us a number of users
+            self.add_user(f"user{i}")   # add the user and give them a name
 
         # Create friendships
+        friendships = []
+        for user_id in self.users:          # For every use
+            for friend_id in range(user_id + 1, self.last_id + 1):      # We came up with potential friendships
+                friendships.append((user_id, friend_id))                # And then added those tuples to frienships
+
+        # Shuffle the friendships to randomly distribute them
+        random.shuffle(friendships)
+
+        for i in range(0, num_users * avg_friendships // 2):    #ex, 7 users, 7 avg_friendships, means we make 7 edges/connections
+            friendship = friendships[i]                         # grab the firendship
+            self.add_friendship(friendship[0], friendship[1])   # Add a specific friendship
+            
 
     def get_all_social_paths(self, user_id):
         """
@@ -59,6 +77,24 @@ class SocialGraph:
         """
         visited = {}  # Note that this is a dictionary, not a set
         # !!!! IMPLEMENT ME
+
+        s = Stack()
+
+        def get_neighbors(id):      # Internal function
+            return self.friendships[id]
+
+        s.push(user_id)
+
+        while s.size() > 0:
+            user = s.pop()
+
+            if user not in visited:
+                visited[user] = [] # add user to visitor as a key with an empty list as a value
+
+                for neighbor in get_neighbors(user): # use our internal function
+                    s.push(neighbor)    # add neighbor to stack
+                    visited[user].append(neighbor)  # append the neighbor to the value, remember a singular vertex can have multiple edges
+
         return visited
 
 
