@@ -1,5 +1,13 @@
 import random
-from util import Stack
+# from projects.graph.util import Stack
+from collections import deque
+class Stack(deque):
+    def push(self, value):
+        self.append(value)
+    # def pop_off(self):
+    #     return self.pop()
+    def size(self):
+        return len(self)
 
 
 class User:
@@ -75,27 +83,70 @@ class SocialGraph:
 
         The key is the friend's ID and the value is the path.
         """
-        visited = {}  # Note that this is a dictionary, not a set
-        # !!!! IMPLEMENT ME
+        # Solution code: Chaz
 
-        s = Stack()
+        #helper function for bfs
+        #returns shortest path from starting_vertex to destination_vertex
+        def bfs(graph, starting_vertex, destination_vertex):
+            q = deque() # use deque as queue
+            q.append([starting_vertex]) # append (to end)
+            visited = set()
 
-        def get_neighbors(id):      # Internal function
-            return self.friendships[id]
+            while len(q) > 0: # While queue isn't empty
+                path = q.popleft() # take from start, built in method of deque
+                vert = path[-1] # last node in path
 
-        s.push(user_id)
+                if vert not in visited:
+                    if vert == destination_vertex:  # if we've reached the destination
+                        return path # then we've we'e found the path, so return
 
-        while s.size() > 0:
-            user = s.pop()
+                    visited.add(vert) #add vert to visited
 
-            if user not in visited:
-                visited[user] = [] # add user to visitor as a key with an empty list as a value
+                    # add all possible paths to queue
+                    for next_vert in graph[vert]:
+                        new_path = list(path)
+                        new_path.append(next_vert)
+                        q.append(new_path)
 
-                for neighbor in get_neighbors(user): # use our internal function
-                    s.push(neighbor)    # add neighbor to stack
-                    visited[user].append(neighbor)  # append the neighbor to the value, remember a singular vertex can have multiple edges
+        # dfs for get_all_social_paths
+        stack = deque() # use deque as stack
+        stack.append([user_id]) # append (to the end)
+        friend_paths = {} # friend_paths dict (visited dict)
+        while len(stack) > 0:   # while stack is not empty
+            path = stack.pop() # remove from the end
+            vert = path[-1]     # grab the last node from the path
+            if vert not in friend_paths:    # If we haven't visited the node yet
+                friend_paths[vert] = bfs(self.friendships, user_id, vert)
 
-        return visited
+                for vert_friend in self.friendships[vert]:
+                    new_path = list(path)
+                    new_path.append(vert_friend)
+                    stack.append(new_path)
+
+        return friend_paths
+
+
+        # visited = {}  # Note that this is a dictionary, not a set
+        # # !!!! IMPLEMENT ME
+
+        # s = Stack()
+
+        # def get_neighbors(id):      # Internal function
+        #     return self.friendships[id]
+
+        # s.push(user_id)
+
+        # while s.size() > 0:
+        #     user = s.pop()
+
+        #     if user not in visited:
+        #         visited[user] = [] # add user to visitor as a key with an empty list as a value
+
+        #         for neighbor in get_neighbors(user): # use our internal function
+        #             s.push(neighbor)    # add neighbor to stack
+        #             visited[user].append(neighbor)  # append the neighbor to the value, remember a singular vertex can have multiple edges
+
+        # return visited
 
 
 if __name__ == '__main__':
